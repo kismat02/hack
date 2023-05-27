@@ -27,6 +27,7 @@ def make_overall_sheet(funding: pd.DataFrame, collection: pd.DataFrame):
 
 
 if __name__ == "__main__":
+    # look for terminal that we want in incassation
     day_terminals_to_cash_out = find_terminals_to_cash_out()
 
     incomes, times = prepare_data()
@@ -37,6 +38,7 @@ if __name__ == "__main__":
 
     routes = {}
     max_num_vehicles = 0
+    # going day by day and getting number of vehicles and daily routes
     for day, terminals in day_terminals_to_cash_out.items():
         route, num_vehicles = find_optimal_routes_with_iterating_num_vehicles(
             distance_matrix=distance_matrix,

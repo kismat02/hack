@@ -6,7 +6,9 @@ from prepare_data import get_mappings, create_distance_matrix
 def get_schedules_of_vehicles(routes_with_num_vehiles: dict) -> dict:
     """Return everyday schedule of armoured vehicles based on their routes."""
     tid_2_idx, _ = get_mappings()
+    # we need to add 10 minutes to do incassation
     distance_matrix = create_distance_matrix() - 10
+    # we can't go back in time ;)
     distance_matrix[distance_matrix < 0] = 0
 
     schedules = {}

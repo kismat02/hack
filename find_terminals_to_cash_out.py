@@ -4,7 +4,7 @@ import numpy as np
 
 from prepare_data import read_data
 
-
+# Initial constants from specification
 PCT = (2/100/365)
 
 INCASSATION_PCT = .0001
@@ -63,11 +63,14 @@ class PoiStats():
         self._weights = weights
     
     def update_day(self, day_sum_dict, daily_list=None):
+        """Function to get incassation points for every day."""
         if daily_list is None:
             self._daily_list = self._get_required_poi() + self._get_optional_poi()
         else:
             self._daily_list = daily_list
         
+        # if point in incassation list -> we restart state counter (num of days)
+        # if point in incassation list -> we restart point cash amount (with last day value)
         for elem in self.sum_dict:
             if elem in self._daily_list:
                 self.state_dict[elem] = 0
@@ -75,11 +78,12 @@ class PoiStats():
             else:
                 self.state_dict[elem] += 1
                 self.sum_dict[elem] += day_sum_dict[elem]
-                
+       
         self._check_violations()
         self._state_date += pd.Timedelta('24 hours')
     
     def _check_violations(self):
+        """Function to check, if there is any rules violations."""
         self._n_violations += len([elem for elem, val in self.state_dict.items() if val >= MAX_DOWNTIME])
         self._n_violations += max(0, len(self._required_list) - self.top_k)
     
@@ -90,10 +94,13 @@ class PoiStats():
     def _get_optional_poi(self):
         # normalized score is sum of normalized (between 0 and 1) daily and amount score
         self._normalized_dict = {}
+        # weights are importances of time and cash amount to sort points
         for elem in self.sum_dict:
             self._normalized_dict[elem] = (self._weights[0] * self.sum_dict[elem] / MAX_AMT + 
                                           self._weights[1] * self.state_dict[elem] / MAX_DOWNTIME)
         
+        # if there is some space, we take into roures not only points with > 1 mln RUB cash amount
+        # but some more points (with suitable timing or amount of money)
         self._optional_list = [
             elem for elem, _ in sorted(self._normalized_dict.items(), key=lambda x: x[1], reverse=True)
             if elem not in self._required_list][:max(0, self.top_k - len(self._required_list))
@@ -131,11 +138,15 @@ def find_terminals_to_cash_out() -> dict[str, list[int]]:
 
     days = cash_ts.columns[1:]
 
+    # if we want to get new best parameters, we need to uncomment code below
+
     # study = optuna.create_study(sampler=optuna.samplers.TPESampler(seed=2023))
     # study.optimize(objective_function, n_trials=100)
     # print(study.best_params, study.best_value)
 
-    # These are optuna found best parameters
+    # These are founded by optuna best parameters
+    # best_amt_weight - importance of time and money charasteristics
+    # best_value - number of collection points per day 
     best_amt_weight = 0.07387688919651192
     best_value = 133
 
