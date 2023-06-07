@@ -44,7 +44,7 @@ async def lifespan(app: FastAPI):
     app_data["stat_obj"] = PoiStats(
         terminals_account_balance,
         BEST_NUM_OF_TERMINALS_TO_CASH_OUT,
-        start_date='2022-08-31 00:00:00',  # some random date
+        start_date='2022-08-31 00:00:00',  # start date for our initial data
         weights=(BEST_CASH_WEIGHT, 1 - BEST_CASH_WEIGHT)
     )
     yield
@@ -53,11 +53,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
+# one API enpoint
 @app.get("/find_optimal_routes", response_class=StreamingResponse)
 async def find_optimal_routes(): # terminals_income: dict[int, float]
+    # update day and get list of points
     app_data["stat_obj"].update_day(app_data["terminals_income"])
     termials_to_cash_out = app_data["stat_obj"]._daily_list
 
+    # get optimal routes
     routes = return_optimal_route(
         distance_matrix=app_data["distance_matrix"],
         terminals_to_cash_out=termials_to_cash_out,
@@ -66,6 +69,7 @@ async def find_optimal_routes(): # terminals_income: dict[int, float]
         num_vehicles=OPTIMAL_NUM_OF_VEHICLES,
     )
 
+    # date of endpoint usage
     today = str(datetime.now().replace(microsecond=0, second=0, minute=0, hour=0))
     result = {today: {"route": routes, "num_vehicles": OPTIMAL_NUM_OF_VEHICLES}}
 
@@ -76,6 +80,7 @@ async def find_optimal_routes(): # terminals_income: dict[int, float]
         final_report[["дата-время прибытия", "дата-время отъезда"]].astype(str)
     )
 
+    # return result as file in fixed format
     stream = StringIO()
     final_report.to_csv(stream, index=False)
     response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")

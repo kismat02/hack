@@ -72,6 +72,7 @@ def postprocess_schedules(schedules_report: pd.DataFrame) -> pd.DataFrame:
     schedules_report_copy = schedules_report.copy()
     violated_routes = schedules_report[pd.to_datetime(schedules_report["дата-время отъезда"]).dt.hour >= 20]
     new_rows = []
+    # going by violations and get cars with some free space in it
     for idx, row in violated_routes.iterrows():
         free_vehicle = (
             schedules_report_copy[
@@ -83,6 +84,8 @@ def postprocess_schedules(schedules_report: pd.DataFrame) -> pd.DataFrame:
             .agg("max")
             .idxmin()
         )
+
+        # get routes of "free" vehicles
         terminals_of_free_vehicle = schedules_report_copy[
             (schedules_report_copy["день"] == row["день"])
             & (schedules_report_copy["порядковый номер броневика"] == free_vehicle)
@@ -99,6 +102,7 @@ def postprocess_schedules(schedules_report: pd.DataFrame) -> pd.DataFrame:
             f"Cannot move terminal {row['устройство']} to another vehicle {free_vehicle} on {row['день']}"
         )
 
+        # change vehicle for some points
         new_row = {
             "день": row["день"],
             "порядковый номер броневика": free_vehicle,
