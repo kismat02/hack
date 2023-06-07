@@ -17,6 +17,9 @@ ARMORED_CAR_PRICE = 20_000
 MAX_TRAVEL_TIME = 12 * 60
 STOP_TIME = 10
 
+BEST_CASH_WEIGHT = 0.07387688919651192
+BEST_NUM_OF_TERMINALS_TO_CASH_OUT = 133
+
 
 def incassation_price(amount):
     return max(INCASSATION_MIN, INCASSATION_PCT * amount)
@@ -147,14 +150,12 @@ def find_terminals_to_cash_out() -> dict[str, list[int]]:
     # These are founded by optuna best parameters
     # best_amt_weight - importance of time and money charasteristics
     # best_value - number of collection points per day 
-    best_amt_weight = 0.07387688919651192
-    best_value = 133
 
     stat_obj = PoiStats(
         cash_ts[days[0]].to_dict(),
-        int(best_value),
+        BEST_NUM_OF_TERMINALS_TO_CASH_OUT,
         start_date='2022-08-31 00:00:00', 
-        weights=(best_amt_weight, 1 - best_amt_weight)
+        weights=(BEST_CASH_WEIGHT, 1 - BEST_CASH_WEIGHT)
     )
 
     day_required_terminals = {}
@@ -162,7 +163,7 @@ def find_terminals_to_cash_out() -> dict[str, list[int]]:
     for day in days[1:]:
         stat_obj.update_day(cash_ts[day].to_dict())
         day_required_terminals[day] = stat_obj._daily_list
-        if int(best_value) < len(stat_obj._required_list):
+        if BEST_NUM_OF_TERMINALS_TO_CASH_OUT < len(stat_obj._required_list):
             raise NameError("There is no parameters without 1 mln RUB rule violation")
 
     return day_required_terminals

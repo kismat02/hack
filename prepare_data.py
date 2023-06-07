@@ -3,9 +3,9 @@ import pandas as pd
 
 
 def read_data():
-    terminals_coords = pd.read_excel("terminal_data_hackathon v4.xlsx", sheet_name="TIDS")
-    incomes = pd.read_excel("terminal_data_hackathon v4.xlsx", sheet_name="Incomes")
-    times = pd.read_csv("times v4.csv")
+    terminals_coords = pd.read_excel("data/terminal_data_hackathon v4.xlsx", sheet_name="TIDS")
+    incomes = pd.read_excel("data/terminal_data_hackathon v4.xlsx", sheet_name="Incomes")
+    times = pd.read_csv("data/times v4.csv")
     return incomes, times, terminals_coords
 
 

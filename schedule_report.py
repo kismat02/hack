@@ -45,7 +45,7 @@ def get_schedules_of_vehicles(routes_with_num_vehiles: dict) -> dict:
     return schedules
 
 
-def create_report_for_schedules(schedules: dict):
+def create_report_for_schedules(schedules: dict) -> pd.DataFrame:
     """Return report of every day schedule of armoured vehicles based on their schedules."""
     df_data = []
     for day, routes in schedules.items():
@@ -61,7 +61,7 @@ def create_report_for_schedules(schedules: dict):
     return pd.DataFrame(df_data)
 
 
-def postprocess_schedules(schedules_report: pd.DataFrame) -> dict:
+def postprocess_schedules(schedules_report: pd.DataFrame) -> pd.DataFrame:
     """
     If somehow some vehicle gets terminals after 20:00,
     it is needed to give these terminals to another vehicles.

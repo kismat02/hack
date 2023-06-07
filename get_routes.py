@@ -3,7 +3,7 @@ from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
 
-def create_data_for_solver(distance_matrix: list[list[int]] | np.ndarray, num_vehicles: int = 1, depot: int = 0):
+def create_data_for_solver(distance_matrix: np.ndarray, num_vehicles: int = 1, depot: int = 0):
     """Return the data for the problem solver."""
     return {
         "distance_matrix": distance_matrix,
@@ -48,7 +48,7 @@ def print_solution(data, manager, routing, solution):
 
 
 def return_optimal_route(
-        distance_matrix: list[list[int]] | np.ndarray,
+        distance_matrix: np.ndarray,
         terminals_to_cash_out: list[int],
         tid_2_idx: dict[int, int],
         idx_2_tid: dict[int, int],
@@ -103,7 +103,7 @@ def return_optimal_route(
 
     solution = routing.SolveWithParameters(search_parameters)
     if solution:
-        print_solution(data, manager, routing, solution)
+        # print_solution(data, manager, routing, solution)
         routes = get_routes(solution, routing, manager, data)
 
         # Last terminal in every route is pseudo depo created on lines 65-66
@@ -115,7 +115,7 @@ def return_optimal_route(
 
 
 def find_optimal_routes_with_iterating_num_vehicles(
-        distance_matrix: np.array,
+        distance_matrix: np.ndarray,
         terminals_to_cash_out: list[int],
         tid_2_idx: dict[int, int],
         idx_2_tid: dict[int, int],
